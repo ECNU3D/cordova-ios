@@ -33,6 +33,9 @@
     if (self != nil) {
         _viewController = viewController;
         _commandQueue = _viewController.commandQueue;
+        [_operationQueue = [[NSOperationQueue alloc] init];
+        [_operationQueue setQualityOfService:NSQualityOfServiceBackground];
+        [_operationQueue setMaxConcurrentOperationCount:30];
 
         NSError* err = nil;
         _callbackIdPattern = [NSRegularExpression regularExpressionWithPattern:@"[^A-Za-z0-9._-]" options:0 error:&err];
@@ -170,7 +173,7 @@
 
 - (void)runInBackground:(void (^)(void))block
 {
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), block);
+    [_operationQueue addOperationWithBlock:block];
 }
 
 - (NSString*)userAgent
